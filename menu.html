@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Austrian Brewery Menu — კრაფტ ლუდი, ქართული კერძები, წასახემსებელი. Tbilisi." />
+  <title>მენიუ — Austrian Brewery</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="assests/austrian.png">
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════════════════
+       NAVIGATION BAR (shared)
+       ════════════════════════════════════════════════════════ -->
+  <nav class="navbar scrolled" id="navbar">
+    <!-- Logo link scrolls to top / goes home -->
+    <a class="nav-logo" href="index.html" aria-label="Austrian Brewery — Home">
+      <div class="logo-img-wrap">
+        <img src="assests/austrian.png" alt="Austrian Brewery Logo"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <span class="logo-placeholder-text" style="display:none;">A</span>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">Austrian Brewery</span>
+        <span class="logo-tagline" data-i18n="footer_tagline">ავსტრიული ლუდი · ქართული სამზარეულო</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html"         data-i18n="nav_home">მთავარი</a></li>
+      <li><a href="menu.html" class="active" data-i18n="nav_menu">მენიუ</a></li>
+      <li><a href="index.html#reservation" data-i18n="nav_reserve">ჯავშანი</a></li>
+      <li><a href="index.html#contact"     data-i18n="nav_contact">კონტაქტი</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="GE">GE</button>
+        <div class="lang-divider"></div>
+        <button class="lang-btn" data-lang="EN">EN</button>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Nav Drawer -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="index.html"              data-i18n="nav_home">მთავარი</a>
+    <a href="menu.html"               data-i18n="nav_menu">მენიუ</a>
+    <a href="index.html#reservation"  data-i18n="nav_reserve">ჯავშანი</a>
+    <a href="index.html#contact"      data-i18n="nav_contact">კონტაქტი</a>
+    <div class="ornament"><div class="ornament-diamond"></div></div>
+    <div class="lang-switcher" style="width:fit-content;">
+      <button class="lang-btn active" data-lang="GE">GE</button>
+      <div class="lang-divider"></div>
+      <button class="lang-btn" data-lang="EN">EN</button>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       MENU PAGE HERO
+       ════════════════════════════════════════════════════════ -->
+  <div class="menu-page-hero">
+    <p class="section-label" data-i18n="menu_eyebrow" style="margin-top:3rem;">ჩვენი შეთავაზება</p>
+    <h1 data-i18n="menu_title">მენიუ</h1>
+    <div class="ornament" style="max-width:200px; margin:1rem auto;"><div class="ornament-diamond"></div></div>
+    <p class="serif-title" data-i18n="menu_sub" style="font-size:1.1rem; color:var(--text-secondary);">
+      კრაფტ ლუდი, ქართული კერძები და წასახემსებელი
+    </p>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       FILTER BAR
+       ════════════════════════════════════════════════════════ -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all"      data-i18n="filter_all">ყველა</button>
+    <button class="filter-btn"        data-filter="beer"     data-i18n="filter_beer">კრაფტ ლუდი</button>
+    <button class="filter-btn"        data-filter="georgian" data-i18n="filter_geo">ქართული კერძები</button>
+    <button class="filter-btn"        data-filter="snacks"   data-i18n="filter_snacks">წასახემსებელი</button>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       MENU GRID — Populated by script.js > renderMenuItems()
+       ════════════════════════════════════════════════════════ -->
+  <main>
+    <div class="menu-grid" id="menu-grid">
+      <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted); font-family:var(--font-serif); font-style:italic;">
+        იტვირთება...
+      </div>
+    </div>
+  </main>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       FOOTER (shared)
+       ════════════════════════════════════════════════════════ -->
+  <footer id="contact">
+    <div class="footer-inner">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <div class="nav-logo" style="margin-bottom:1rem;">
+            <div class="logo-img-wrap" style="width:44px;height:44px;">
+              <img src="assests/austrian.png" alt="Austrian Brewery"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+              <span class="logo-placeholder-text" style="display:none; font-size:1.1rem;">A</span>
+            </div>
+            <span class="logo-name">Austrian Brewery</span>
+          </div>
+          <p data-i18n="footer_brand_p">
+            გამოჩნდი და გაეცანი ჩვენს ატმოსფეროს.
+          </p>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/AustrianBrewery/?locale=ka_GE"
+               target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+              <span>Facebook</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4 data-i18n="footer_h_contact">კონტაქტი</h4>
+          <address>
+            <div class="footer-contact-row">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <p data-i18n="footer_addr">დავით აღმაშენებლის ხეივანი 256, თბილისი</p>
+            </div>
+            <div class="footer-contact-row">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 14a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 3.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.91a16 16 0 0 0 6.16 6.16l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 18.5"/></svg>
+              <a href="tel:551117917" style="color:var(--gold);">551 11 79 17</a>
+            </div>
+            <div class="footer-contact-row">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <a href="mailto:austrianbrewery@gmail.com" style="color:var(--gold);">austrianbrewery@gmail.com</a>
+            </div>
+          </address>
+        </div>
+
+        <div class="footer-col">
+          <h4 data-i18n="footer_h_hours">სამუშაო საათები</h4>
+          <p data-i18n="footer_hours">ყოველდღე: 12:00 – 23:00</p>
+          <p style="margin-top:1rem; font-size:0.78rem; color:var(--text-muted);">
+            256 Davit Aghmashenebeli Ave<br>Tbilisi, Georgia
+          </p>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p data-i18n="footer_copy">© 2025 Austrian Brewery. ყველა უფლება დაცულია.</p>
+        <div class="footer-links">
+          <a href="index.html"  data-i18n="nav_home">მთავარი</a>
+          <a href="#"           data-i18n="footer_privacy">კონფიდენციალობა</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

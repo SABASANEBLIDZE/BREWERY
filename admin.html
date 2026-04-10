@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Austrian Brewery</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:        #c8a84b;
+      --gold-light:  #e2c97e;
+      --dark:        #0e0d0b;
+      --surface:     #1a1814;
+      --card:        #211f1a;
+      --border:      #2e2b24;
+      --text:        #f0ead8;
+      --text-muted:  #8a8070;
+      --green:       #4caf7d;
+      --red:         #e05c5c;
+      --yellow:      #e0b84d;
+      --font-sans:   'Segoe UI', system-ui, sans-serif;
+      --font-mono:   'Courier New', monospace;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+    }
+
+    /* ── Top Bar ──────────────────────────────────────── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .topbar-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--dark);
+      font-size: 1rem;
+    }
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .topbar-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .topbar-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    /* ── Buttons ──────────────────────────────────────── */
+    .btn {
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-gold    { background: var(--gold); color: var(--dark); }
+    .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-outline:hover { color: var(--text); border-color: var(--text-muted); opacity: 1; }
+    .btn-danger  { background: var(--red); color: #fff; }
+    .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.72rem; }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── Stats Row ────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Toolbar ──────────────────────────────────────── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .toolbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      flex: 1;
+      min-width: 120px;
+    }
+    .search-input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      width: 220px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--gold); }
+    .filter-select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.82rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-select:focus { border-color: var(--gold); }
+
+    /* ── Table ────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    thead {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: 0.9rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: var(--gold); }
+    th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    th.sorted .sort-icon { opacity: 1; color: var(--gold); }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(200, 168, 75, 0.04); }
+
+    .td-name   { font-weight: 600; color: var(--text); }
+    .td-phone  { color: var(--gold); font-family: var(--font-mono); font-size: 0.8rem; }
+    .td-table  { font-weight: 700; color: var(--gold-light); }
+    .td-guests { text-align: center; }
+    .td-date   { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); }
+    .td-time   {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: rgba(200,168,75,0.1);
+      color: var(--gold);
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .td-actions { display: flex; gap: 0.4rem; }
+
+    /* ── Status Badge ─────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge-pending   { background: rgba(224,184,77,0.15); color: var(--yellow); border: 1px solid rgba(224,184,77,0.3); }
+    .badge-confirmed { background: rgba(76,175,125,0.15); color: var(--green);  border: 1px solid rgba(76,175,125,0.3); }
+    .badge-cancelled { background: rgba(224,92,92,0.12);  color: var(--red);    border: 1px solid rgba(224,92,92,0.25); }
+
+    /* ── Empty / Loading States ───────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-text { font-size: 0.9rem; }
+
+    /* ── Toast ────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--gold);
+      color: var(--text);
+      padding: 0.8rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Password Gate ────────────────────────────────── */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    #gate h2 { color: var(--gold); font-size: 1.3rem; }
+    #gate p  { color: var(--text-muted); font-size: 0.85rem; }
+    #gate input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      width: 240px;
+      text-align: center;
+      outline: none;
+      letter-spacing: 0.1em;
+    }
+    #gate input:focus { border-color: var(--gold); }
+    #gate-error { color: var(--red); font-size: 0.78rem; min-height: 1em; }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 700px) {
+      .topbar { padding: 0.9rem 1rem; }
+      .main   { padding: 1.25rem 0.75rem 3rem; }
+      table   { font-size: 0.75rem; }
+      td, th  { padding: 0.65rem 0.6rem; }
+      .search-input { width: 150px; }
+      th:nth-child(5),
+      td:nth-child(5) { display: none; }   /* hide guests col on mobile */
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     PASSWORD GATE
+     ══════════════════════════════════════════════════ -->
+<div id="gate">
+  <div style="font-size:2rem;">🍺</div>
+  <h2>Austrian Brewery — Admin</h2>
+  <p>Enter the admin password to continue</p>
+  <input type="password" id="gate-input" placeholder="Password" autocomplete="off" />
+  <div id="gate-error"></div>
+  <button class="btn btn-gold" onclick="checkPassword()">Enter</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TOP BAR
+     ══════════════════════════════════════════════════ -->
+<header class="topbar" id="app" style="display:none;">
+  <div class="topbar-brand">
+    <div class="topbar-logo">A</div>
+    <div>
+      <div class="topbar-title">Austrian Brewery</div>
+      <div class="topbar-sub">Reservations Admin Panel</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Clear All</button>
+    <a href="index.html" class="btn btn-outline">← Back to Site</a>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════
+     MAIN CONTENT
+     ══════════════════════════════════════════════════ -->
+<main class="main" id="main-content" style="display:none;">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-label">Total Reservations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-today">0</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-pending">0</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-confirmed">0</div>
+      <div class="stat-label">Confirmed</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-title">All Reservations</div>
+    <input
+      type="text"
+      class="search-input"
+      id="search-input"
+      placeholder="Search name or phone…"
+      oninput="renderTable()"
+    />
+    <select class="filter-select" id="status-filter" onchange="renderTable()">
+      <option value="all">All statuses</option>
+      <option value="pending">Pending</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+    <select class="filter-select" id="date-filter" onchange="renderTable()">
+      <option value="all">All dates</option>
+      <option value="today">Today</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="past">Past</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="renderTable()">↻ Refresh</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('name')">Name <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('phone')">Phone <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('date')">Date <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('time')">Time <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('guests')" class="td-guests">Guests <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('tableId')">Table <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('status')">Status <span class="sort-icon">↕</span></th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="reservations-tbody">
+        <tr><td colspan="8">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">Loading reservations…</div>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+  /* ══════════════════════════════════════════════════
+     CONFIG — change password here
+     ══════════════════════════════════════════════════ */
+  const ADMIN_PASSWORD   = 'ss123';   // ← Change this!
+  const STORAGE_KEY      = 'ab_reservations';
+
+  /* ── Password Gate ─────────────────────────────── */
+  const gateInput = document.getElementById('gate-input');
+  gateInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+  function checkPassword() {
+    const val = gateInput.value.trim();
+    if (val === ADMIN_PASSWORD) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = '';
+      document.getElementById('main-content').style.display = '';
+      renderTable();
+      updateStats();
+    } else {
+      document.getElementById('gate-error').textContent = 'Wrong password. Try again.';
+      gateInput.value = '';
+      gateInput.focus();
+    }
+  }
+
+  /* ── Data helpers ──────────────────────────────── */
+  function loadReservations() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveReservations(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function todayStr() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  /* ── Stats ─────────────────────────────────────── */
+  function updateStats() {
+    const all     = loadReservations();
+    const today   = todayStr();
+    document.getElementById('stat-total').textContent     = all.length;
+    document.getElementById('stat-today').textContent     = all.filter(r => r.date === today).length;
+    document.getElementById('stat-pending').textContent   = all.filter(r => (r.status || 'pending') === 'pending').length;
+    document.getElementById('stat-confirmed').textContent = all.filter(r => r.status === 'confirmed').length;
+  }
+
+  /* ── Sort State ────────────────────────────────── */
+  let sortField = 'date';
+  let sortAsc   = false;
+
+  function sortBy(field) {
+    if (sortField === field) sortAsc = !sortAsc;
+    else { sortField = field; sortAsc = true; }
+
+    document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+    const headers = ['name','phone','date','time','guests','tableId','status'];
+    const idx = headers.indexOf(field);
+    if (idx >= 0) document.querySelectorAll('th')[idx].classList.add('sorted');
+
+    renderTable();
+  }
+
+  /* ── Render Table ──────────────────────────────── */
+  function renderTable() {
+    let data = loadReservations();
+    const search   = document.getElementById('search-input').value.toLowerCase();
+    const statusF  = document.getElementById('status-filter').value;
+    const dateF    = document.getElementById('date-filter').value;
+    const today    = todayStr();
+
+    /* Filter */
+    if (search) {
+      data = data.filter(r =>
+        r.name.toLowerCase().includes(search) ||
+        r.phone.toLowerCase().includes(search)
+      );
+    }
+    if (statusF !== 'all') {
+      data = data.filter(r => (r.status || 'pending') === statusF);
+    }
+    if (dateF === 'today') {
+      data = data.filter(r => r.date === today);
+    } else if (dateF === 'upcoming') {
+      data = data.filter(r => r.date > today);
+    } else if (dateF === 'past') {
+      data = data.filter(r => r.date < today);
+    }
+
+    /* Sort */
+    data.sort((a, b) => {
+      let av = a[sortField] ?? '';
+      let bv = b[sortField] ?? '';
+      if (sortField === 'tableId' || sortField === 'guests') {
+        av = Number(av); bv = Number(bv);
+      } else {
+        av = String(av).toLowerCase(); bv = String(bv).toLowerCase();
+      }
+      return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+    });
+
+    const tbody = document.getElementById('reservations-tbody');
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="8">
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-text">No reservations found.</div>
+        </div>
+      </td></tr>`;
+      updateStats();
+      return;
+    }
+
+    tbody.innerHTML = data.map(r => {
+      const status  = r.status || 'pending';
+      const allData = loadReservations();
+      const realIdx = allData.findIndex(x => x.id === r.id);
+      const bookedAt = r.bookedAt
+        ? new Date(r.bookedAt).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
+        : '—';
+
+      return `
+        <tr>
+          <td class="td-name">${escHtml(r.name)}<br><span style="font-size:0.68rem;color:var(--text-muted);">Booked: ${bookedAt}</span></td>
+          <td class="td-phone">${escHtml(r.phone)}</td>
+          <td class="td-date">${r.date}</td>
+          <td><span class="td-time">${r.time}</span></td>
+          <td class="td-guests">${r.guests || '—'}</td>
+          <td class="td-table">${r.tableId ? 'T'+r.tableId : '—'}</td>
+          <td>
+            <span class="badge badge-${status}">${status}</span>
+          </td>
+          <td class="td-actions">
+            ${status !== 'confirmed'  ? `<button class="btn btn-sm" style="background:rgba(76,175,125,0.2);color:var(--green);border:1px solid rgba(76,175,125,0.3);" onclick="setStatus(${r.id},'confirmed')">✓ Confirm</button>` : ''}
+            ${status !== 'cancelled'  ? `<button class="btn btn-sm" style="background:rgba(224,92,92,0.15);color:var(--red);border:1px solid rgba(224,92,92,0.25);" onclick="setStatus(${r.id},'cancelled')">✕ Cancel</button>` : ''}
+            <button class="btn btn-sm btn-outline" onclick="deleteEntry(${r.id})">🗑</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    updateStats();
+  }
+
+  /* ── Actions ───────────────────────────────────── */
+  function setStatus(id, status) {
+    const all = loadReservations();
+    const idx = all.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    all[idx].status = status;
+    saveReservations(all);
+    renderTable();
+    showToast(`Reservation ${status}!`);
+  }
+
+  function deleteEntry(id) {
+    if (!confirm('Delete this reservation?')) return;
+    const all = loadReservations().filter(r => r.id !== id);
+    saveReservations(all);
+    renderTable();
+    showToast('Reservation deleted.');
+  }
+
+  function clearAll() {
+    if (!confirm('Delete ALL reservations? This cannot be undone.')) return;
+    saveReservations([]);
+    renderTable();
+    showToast('All reservations cleared.');
+  }
+
+  /* ── Export CSV ────────────────────────────────── */
+  function exportCSV() {
+    const data = loadReservations();
+    if (!data.length) { showToast('No data to export.'); return; }
+
+    const headers = ['ID','Name','Phone','Date','Time','Guests','Table','Status','BookedAt'];
+    const rows    = data.map(r => [
+      r.id, r.name, r.phone, r.date, r.time,
+      r.guests || '', `T${r.tableId}`, r.status || 'pending', r.bookedAt || ''
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+
+    const csv  = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `austrian-brewery-reservations-${todayStr()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exported!');
+  }
+
+  /* ── Toast ─────────────────────────────────────── */
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  /* ── Escape HTML ───────────────────────────────── */
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* Auto-refresh every 30 seconds (if tab is open) */
+  setInterval(() => {
+    if (document.getElementById('app').style.display !== 'none') renderTable();
+  }, 30000);
+</script>
+</body>
+</html>
