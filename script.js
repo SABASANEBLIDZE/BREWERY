@@ -2,7 +2,7 @@
    AUSTRIAN BREWERY — script.js (FULLY IMPROVED)
    ── FIX LIST ────────────────────────────────────────────────
    1. Logo click → smooth scroll to top (#home) ✓
-   2. Reservation system with localStorage storage ✓
+   2. Reservation system with shared database storage ✓
       - Reservations saved permanently in browser
       - Time slots show as booked when date already reserved
       - Dynamic availability update after booking
@@ -412,24 +412,47 @@ function initImageFallbacks() {
 /* ══════════════════════════════════════════════════════════════
    RESERVATION SYSTEM (SIMPLIFIED)
    ══════════════════════════════════════════════════════════════
-   Reservations are stored in localStorage under 'ab_reservations'.
-   Open admin.html in the same browser to view all submissions.
+   Reservations are stored in a shared Supabase table.
+   Open admin.html on any device to view all submissions.
    ══════════════════════════════════════════════════════════════ */
 
-const RESERVATION_STORAGE_KEY = 'ab_reservations';
+const RESERVATION_MESSAGES = {
+  GE: {
+    loading: 'ჯავშანი იგზავნება...',
+    loadingConfig: 'რეზერვაციის სისტემა იტვირთება...',
+    configError: 'რეზერვაციის საერთო ბაზა ჯერ არ არის გამართული. გთხოვთ შეავსოთ Supabase-ის კონფიგურაცია.',
+    networkError: 'ჯავშნის გაგზავნა ვერ მოხერხდა. სცადეთ თავიდან.',
+    successAlert: 'ჯავშნის მოთხოვნა გაიგზავნა. მალე დაგიკავშირდებით დასადასტურებლად.',
+    successInline: 'ჯავშანი საერთო ბაზაში შეინახა და ადმინ პანელშიც გამოჩნდება.',
+  },
+  EN: {
+    loading: 'Sending your reservation...',
+    loadingConfig: 'Reservation system is loading...',
+    configError: 'Shared reservation storage is not configured yet. Please complete the Supabase setup.',
+    networkError: 'We could not send the reservation. Please try again.',
+    successAlert: 'Reservation request sent. We will contact you to confirm.',
+    successInline: 'Your reservation has been saved to the shared database and will appear in the admin panel.',
+  },
+};
 
-/** Load all reservations from localStorage */
-function loadReservations() {
-  try {
-    return JSON.parse(localStorage.getItem(RESERVATION_STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
+function getReservationMessage(key) {
+  return RESERVATION_MESSAGES[currentLang]?.[key] || RESERVATION_MESSAGES.EN[key] || '';
 }
 
-/** Save reservations array to localStorage */
-function saveReservations(reservations) {
-  localStorage.setItem(RESERVATION_STORAGE_KEY, JSON.stringify(reservations));
+function setReservationStatusMessage(message, tone = '') {
+  const statusEl = document.getElementById('res-status-message');
+  if (!statusEl) return;
+
+  statusEl.textContent = message || '';
+  statusEl.className = 'res-status-message';
+
+  if (message) {
+    statusEl.classList.add('visible');
+  }
+
+  if (tone) {
+    statusEl.classList.add(`is-${tone}`);
+  }
 }
 
 /** Set date input minimum to today */
@@ -467,7 +490,8 @@ function initReservationForm() {
     });
   });
 
-  submitBtn.addEventListener('click', () => {
+  submitBtn.addEventListener('click', async () => {
+    const store = window.ABReservationStore;
     const name   = document.getElementById('res-name')?.value.trim();
     const phone  = document.getElementById('res-phone')?.value.trim();
     const guests = document.getElementById('res-guests')?.value;
@@ -494,14 +518,24 @@ function initReservationForm() {
     } else document.getElementById('err-time')?.classList.remove('visible');
 
     if (hasError) {
+      setReservationStatusMessage('');
       submitBtn.style.animation = 'shake 0.4s ease';
       setTimeout(() => submitBtn.style.animation = '', 500);
+      return;
+      }
+
+    if (!store) {
+      setReservationStatusMessage(getReservationMessage('loadingConfig'), 'error');
+      return;
+    }
+
+    if (!store.isConfigured()) {
+      setReservationStatusMessage(store.getConfigError() || getReservationMessage('configError'), 'error');
       return;
     }
 
     /* ── Save to localStorage (admin.html reads this) ── */
     const reservation = {
-      id:       Date.now(),
       name,
       phone,
       guests,
@@ -510,23 +544,46 @@ function initReservationForm() {
       status:   'pending',
       bookedAt: new Date().toISOString(),
     };
-    const all = loadReservations();
-    all.push(reservation);
-    saveReservations(all);
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    setReservationStatusMessage(getReservationMessage('loading'));
+
+    try {
+      await store.migrateLegacyReservations();
+      const savedReservation = await store.createReservation(reservation);
+      const successEl = document.getElementById('res-success');
+      const detailEl  = document.getElementById('res-success-detail');
 
     /* ── Show success ── */
-    const successEl = document.getElementById('res-success');
-    const detailEl  = document.getElementById('res-success-detail');
-    if (successEl) {
-      successEl.style.display = 'flex';
-      submitBtn.style.display = 'none';
+      const successElDuplicate = document.getElementById('res-success');
+      const detailElDuplicate  = document.getElementById('res-success-detail');
+      if (successEl) {
+        successEl.style.display = 'flex';
+        submitBtn.style.display = 'none';
     }
-    if (detailEl) {
+      if (detailEl) {
       detailEl.textContent = `${name} · ${date} · ${time}`;
     }
 
+      if (detailEl) {
+        detailEl.textContent = `${savedReservation.name} | ${savedReservation.date} | ${savedReservation.time}`;
+      }
+
+      setReservationStatusMessage(getReservationMessage('successInline'), 'success');
+      alert(getReservationMessage('successAlert'));
+      console.log('[Austrian Brewery] New reservation saved:', savedReservation);
+      return;
+
     alert('Reservation request sent! We will contact you to confirm.');
     console.log('[Austrian Brewery] New reservation saved:', reservation);
+    } catch (error) {
+      console.error('[Austrian Brewery] Reservation save failed:', error);
+      setReservationStatusMessage(error?.message || getReservationMessage('networkError'), 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+    }
   });
 }
 
