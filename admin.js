@@ -45,7 +45,9 @@
   }
 
   function quoteJs(value) {
-    return JSON.stringify(String(value));
+    return `'${String(value)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")}'`;
   }
 
   function updateStats() {
