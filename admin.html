@@ -141,6 +141,14 @@
       margin-bottom: 1.25rem;
       flex-wrap: wrap;
     }
+    .sync-status {
+      flex-basis: 100%;
+      min-height: 1.2em;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      word-break: break-word;
+    }
+    .sync-status.error { color: #f0c0c0; }
     .toolbar-title {
       font-size: 1rem;
       font-weight: 700;
@@ -175,7 +183,8 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
     table {
       width: 100%;
@@ -301,6 +310,13 @@
     /* ── Responsive ───────────────────────────────────── */
     @media (max-width: 700px) {
       .topbar { padding: 0.9rem 1rem; }
+      .topbar,
+      .topbar-actions {
+        flex-wrap: wrap;
+      }
+      .topbar-actions {
+        justify-content: flex-end;
+      }
       .main   { padding: 1.25rem 0.75rem 3rem; }
       table   { font-size: 0.75rem; }
       td, th  { padding: 0.65rem 0.6rem; }
@@ -389,7 +405,8 @@
       <option value="upcoming">Upcoming</option>
       <option value="past">Past</option>
     </select>
-    <button class="btn btn-outline btn-sm" onclick="renderTable()">↻ Refresh</button>
+    <button class="btn btn-outline btn-sm" onclick="refreshReservations()">↻ Refresh</button>
+    <div class="sync-status" id="sync-status" aria-live="polite"></div>
   </div>
 
   <!-- Table -->
@@ -423,7 +440,7 @@
 <!-- Toast -->
 <div id="toast"></div>
 
-<script>
+<script type="application/json" id="legacy-admin-script">
   /* ══════════════════════════════════════════════════
      CONFIG — change password here
      ══════════════════════════════════════════════════ */
@@ -639,5 +656,9 @@
     if (document.getElementById('app').style.display !== 'none') renderTable();
   }, 30000);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="reservations-store.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>
